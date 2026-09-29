@@ -1,0 +1,15 @@
+{
+  "name": "guardianlink-firebase-rules-tests",
+  "private": true,
+  "scripts": {
+    "test": "jest",
+    "test:rules": "firebase emulators:exec --only firestore,database \"jest --runInBand\"",
+    "test:rules:storage": "firebase emulators:exec --only firestore,database,storage \"set TEST_STORAGE=1&& jest --runInBand\""
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^3.0.4",
+    "firebase": "^10.14.1",
+    "firebase-tools": "13.29.1",
+    "jest": "^29.7.0"
+  }
+}

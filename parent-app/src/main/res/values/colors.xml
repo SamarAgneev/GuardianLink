@@ -1,0 +1,7 @@
+<resources>
+    <color name="guardian_primary">#1565C0</color>
+    <color name="guardian_primary_dark">#0D47A1</color>
+    <color name="guardian_accent">#00A6A6</color>
+    <color name="status_online">#2E7D32</color>
+    <color name="status_offline">#C62828</color>
+</resources>

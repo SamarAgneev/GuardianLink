@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+        <com.google.android.material.chip.ChipGroup android:id="@+id/chip_group_devices" android:layout_width="match_parent" android:layout_height="wrap_content" />
+        <TextView android:id="@+id/tv_child_name" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="22sp" />
+        <TextView android:id="@+id/tv_online_status" android:layout_width="match_parent" android:layout_height="wrap_content" />
+        <View android:id="@+id/view_status_dot" android:layout_width="12dp" android:layout_height="12dp" android:background="@drawable/dot_red" />
+        <TextView android:id="@+id/tv_battery" android:layout_width="match_parent" android:layout_height="wrap_content" />
+        <TextView android:id="@+id/tv_current_app" android:layout_width="match_parent" android:layout_height="wrap_content" />
+        <TextView android:id="@+id/tv_location" android:layout_width="match_parent" android:layout_height="wrap_content" />
+        <TextView android:id="@+id/tv_last_seen" android:layout_width="match_parent" android:layout_height="wrap_content" />
+        <Button android:id="@+id/btn_live_screen" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Live screen" />
+        <Button android:id="@+id/btn_live_camera" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Live camera" />
+        <Button android:id="@+id/btn_live_audio" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Live audio" />
+        <Button android:id="@+id/btn_photos" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Photos" />
+        <Button android:id="@+id/btn_lock_device" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Lock device" />
+        <androidx.recyclerview.widget.RecyclerView android:id="@+id/rv_recent_alerts" android:layout_width="match_parent" android:layout_height="160dp" />
+        <androidx.recyclerview.widget.RecyclerView android:id="@+id/rv_app_usage" android:layout_width="match_parent" android:layout_height="160dp" />
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp">
+    <Button
+        android:id="@+id/btn_change_pin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Change PIN" />
+    <Button
+        android:id="@+id/btn_unpair_device"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Unpair device" />
+    <Button
+        android:id="@+id/btn_disable_admin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Disable device admin" />
+    <Button
+        android:id="@+id/btn_stop_monitoring"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Stop monitoring" />
+</LinearLayout>

@@ -1,0 +1,166 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build Parent and Child Debug APKs",
+			"type": "shell",
+			"command": "C:\\Users\\samar\\.gradle\\wrapper\\dists\\gradle-8.7-bin\\bhs2wmbdwecv87pi65oeuq5iu\\gradle-8.7\\bin\\gradle.bat",
+			"args": [
+				":child-app:assembleDebug",
+				":parent-app:assembleDebug"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Validate Safe App Labels",
+			"type": "shell",
+			"command": "C:\\Users\\samar\\.gradle\\wrapper\\dists\\gradle-8.7-bin\\bhs2wmbdwecv87pi65oeuq5iu\\gradle-8.7\\bin\\gradle.bat",
+			"args": [
+				":child-app:processDebugResources",
+				":parent-app:processDebugResources"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check Worker Syntax",
+			"type": "shell",
+			"command": "node.exe",
+			"args": [
+				"--check",
+				"cloudflare/worker/src/index.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Validate Worker REST Fixes",
+			"type": "shell",
+			"command": "node.exe",
+			"args": [
+				"--check",
+				"cloudflare/worker/src/index.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Compile Worker Android Client",
+			"type": "shell",
+			"command": "C:\\Users\\samar\\.gradle\\wrapper\\dists\\gradle-8.7-bin\\bhs2wmbdwecv87pi65oeuq5iu\\gradle-8.7\\bin\\gradle.bat",
+			"args": [
+				":common:compileDebugKotlin"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Recompile Worker Android Client",
+			"type": "shell",
+			"command": "C:\\Users\\samar\\.gradle\\wrapper\\dists\\gradle-8.7-bin\\bhs2wmbdwecv87pi65oeuq5iu\\gradle-8.7\\bin\\gradle.bat",
+			"args": [
+				":common:compileDebugKotlin"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Compile Worker-integrated Apps",
+			"type": "shell",
+			"command": "C:\\Users\\samar\\.gradle\\wrapper\\dists\\gradle-8.7-bin\\bhs2wmbdwecv87pi65oeuq5iu\\gradle-8.7\\bin\\gradle.bat",
+			"args": [
+				":child-app:compileDebugKotlin",
+				":parent-app:compileDebugKotlin"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Install Cloudflare Worker Tooling",
+			"type": "shell",
+			"command": "npm.cmd",
+			"args": [
+				"install",
+				"--prefix",
+				"cloudflare/worker",
+				"--no-audit",
+				"--no-fund"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Bundle Cloudflare Worker",
+			"type": "shell",
+			"command": "cloudflare\\worker\\node_modules\\.bin\\wrangler.cmd",
+			"args": [
+				"deploy",
+				"--dry-run",
+				"--outdir",
+				".wrangler\\dry-run"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Bundle Worker with Config",
+			"type": "shell",
+			"command": "cloudflare\\worker\\node_modules\\.bin\\wrangler.cmd",
+			"args": [
+				"deploy",
+				"--config",
+				"cloudflare/worker/wrangler.toml",
+				"--dry-run",
+				"--outdir",
+				"cloudflare/worker/.wrangler/dry-run"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Compile Current Worker Integration",
+			"type": "shell",
+			"command": "C:\\Users\\samar\\.gradle\\wrapper\\dists\\gradle-8.7-bin\\bhs2wmbdwecv87pi65oeuq5iu\\gradle-8.7\\bin\\gradle.bat",
+			"args": [
+				":child-app:compileDebugKotlin",
+				":parent-app:compileDebugKotlin"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Validate Worker Command Rules",
+			"type": "shell",
+			"command": "firebase\\node_modules\\.bin\\firebase.cmd",
+			"args": [
+				"emulators:exec",
+				"--config",
+				"firebase/firebase.json",
+				"--project",
+				"demo-guardianlink",
+				"--only",
+				"firestore,database",
+				"npm.cmd test --prefix firebase -- --runInBand --runTestsByPath rules.test.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Validate Worker Security Limits",
+			"type": "shell",
+			"command": "cloudflare\\worker\\node_modules\\.bin\\wrangler.cmd",
+			"args": [
+				"deploy",
+				"--config",
+				"cloudflare/worker/wrangler.toml",
+				"--dry-run",
+				"--outdir",
+				"cloudflare/worker/.wrangler/dry-run"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		}
+	]
+}

@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">SafeChild</string>
+    <string name="accessibility_service_label">GuardianLink App Blocking</string>
+    <string name="accessibility_service_description">Blocks apps according to parental settings.</string>
+    <string name="app_blocked_message">%1$s is blocked by your parent.</string>
+    <string name="screen_time_limit_reached">Daily screen-time limit reached.</string>
+    <string name="bedtime_locked_message">Bedtime is active. Device is locked by your parent.</string>
+    <string name="consent_next">Next</string>
+    <string name="consent_finish">Continue</string>
+    <string name="pin_create_title">Create PIN</string>
+    <string name="pin_change_title">Change PIN</string>
+    <string name="pin_enter_title">Enter PIN</string>
+    <string name="pin_enter_current_title">Enter Current PIN</string>
+    <string name="pin_confirm_title">Confirm PIN</string>
+    <string name="pin_wrong_attempts">Incorrect PIN. %1$d attempts remaining.</string>
+    <string name="pin_mismatch">PINs do not match.</string>
+    <string name="pin_locked_message">PIN locked. Try again in %1$d minutes.</string>
+</resources>

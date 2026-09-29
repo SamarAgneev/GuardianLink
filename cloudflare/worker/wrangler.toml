@@ -1,0 +1,17 @@
+name = "guardianlink-api"
+main = "src/index.js"
+compatibility_date = "2026-09-29"
+
+[vars]
+FIREBASE_PROJECT_ID = "guardianlink-b9f5d"
+FIREBASE_DATABASE_URL = "https://guardianlink-b9f5d-default-rtdb.asia-southeast1.firebasedatabase.app"
+
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "guardianlink-safe-media"
+
+[triggers]
+crons = ["* * * * *", "0 * * * *", "55 23 * * *"]
+
+[observability]
+enabled = true

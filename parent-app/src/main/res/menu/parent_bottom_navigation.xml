@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/dashboardFragment" android:title="Dashboard" android:icon="@drawable/ic_dashboard" />
+    <item android:id="@+id/activityFragment" android:title="Activity" android:icon="@drawable/ic_activity" />
+    <item android:id="@+id/locationFragment" android:title="Location" android:icon="@drawable/ic_location" />
+    <item android:id="@+id/alertsFragment" android:title="Alerts" android:icon="@drawable/ic_alert" />
+    <item android:id="@+id/settingsFragment" android:title="Settings" android:icon="@drawable/ic_settings" />
+</menu>
