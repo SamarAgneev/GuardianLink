@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/parent_nav_graph"
+    app:startDestination="@id/dashboardFragment">
+    <fragment android:id="@+id/dashboardFragment" android:name="com.guardianlink.parent.ui.dashboard.DashboardFragment" android:label="Dashboard">
+        <action android:id="@+id/liveViewFragment" app:destination="@id/dashboardFragment" />
+    </fragment>
+    <fragment android:id="@+id/activityFragment" android:name="com.guardianlink.parent.ui.activity.ActivityFragment" android:label="Activity" />
+    <fragment android:id="@+id/locationFragment" android:name="com.guardianlink.parent.ui.location.LocationFragment" android:label="Location" />
+    <fragment android:id="@+id/alertsFragment" android:name="com.guardianlink.parent.ui.alerts.AlertsFragment" android:label="Alerts" />
+    <fragment android:id="@+id/settingsFragment" android:name="com.guardianlink.parent.ui.settings.SettingsFragment" android:label="Settings" />
+</navigation>

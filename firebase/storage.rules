@@ -1,0 +1,55 @@
+// firebase/storage.rules
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isParentOfDevice(deviceId) {
+      return isAuthenticated() &&
+        firestore.get(/databases/(default)/documents/devices/$(deviceId)).data.parentId == request.auth.uid;
+    }
+
+    function isChildDevice(deviceId) {
+      return isAuthenticated() &&
+        firestore.get(/databases/(default)/documents/devices/$(deviceId)).data.authUid == request.auth.uid &&
+        request.auth.token.role == 'device' &&
+        request.auth.token.deviceId == deviceId;
+    }
+
+    function isAuthorizedDevice(deviceId) {
+      return isParentOfDevice(deviceId) || isChildDevice(deviceId);
+    }
+
+    // ── Photos captured by child camera ────────────────────────────────────
+    match /photos/{deviceId}/{filename} {
+      allow read: if isAuthorizedDevice(deviceId);
+      allow create: if isChildDevice(deviceId)
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow update: if isChildDevice(deviceId)
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if isParentOfDevice(deviceId);
+    }
+
+    // ── Screenshots captured from screen mirror ────────────────────────────
+    match /screenshots/{deviceId}/{filename} {
+      allow read: if isAuthorizedDevice(deviceId);
+      allow create: if isChildDevice(deviceId)
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow update: if isChildDevice(deviceId)
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if isParentOfDevice(deviceId);
+    }
+
+    // ── Deny everything else ───────────────────────────────────────────────
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

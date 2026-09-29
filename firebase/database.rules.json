@@ -1,0 +1,97 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    // device_acl is written only by Admin SDK / trusted backend. Each value
+    // is {"role":"parent"} or {"role":"device"}.
+    "device_acl": {
+      "$deviceId": {
+        "$uid": { ".read": false, ".write": false }
+      }
+    },
+
+    // ── Location (real-time) ────────────────────────────────────────────────
+    "location": {
+      "$deviceId": {
+        ".read": "auth != null && root.child('device_acl').child($deviceId).child(auth.uid).exists()",
+        ".write": "auth != null && root.child('device_acl').child($deviceId).child(auth.uid).child('role').val() == 'device'"
+      }
+    },
+
+    // ── Device Status ───────────────────────────────────────────────────────
+    "status": {
+      "$deviceId": {
+        ".read": "auth != null && root.child('device_acl').child($deviceId).child(auth.uid).exists()",
+        ".write": "auth != null && root.child('device_acl').child($deviceId).child(auth.uid).child('role').val() == 'device'"
+      }
+    },
+
+    // ── Commands (child listens, parent writes) ─────────────────────────────
+    "commands": {
+      "$deviceId": {
+        "$commandId": {
+          ".read": "auth != null && root.child('device_acl').child($deviceId).child(auth.uid).exists()",
+          ".validate": "newData.hasChildren(['type', 'status', 'parentId', 'childDeviceId'])",
+          "status": {
+            ".write": "auth != null && root.child('device_acl').child($deviceId).child(auth.uid).child('role').val() == 'device'"
+          }
+        }
+      }
+    },
+
+    // ── WebRTC Signaling ────────────────────────────────────────────────────
+    "webrtc": {
+      "$sessionId": {
+        ".read": "auth != null && data.child('expiresAt').val() > now && ((root.child('device_acl').child(data.child('deviceId').val()).child(auth.uid).child('role').val() == 'parent' && data.child('parentId').val() == auth.uid) || (root.child('device_acl').child(data.child('deviceId').val()).child(auth.uid).child('role').val() == 'device' && data.child('deviceId').val() == auth.token.deviceId))",
+        ".write": "auth != null && !data.exists() && newData.child('sessionId').val() == $sessionId && newData.child('deviceId').val() != null && root.child('device_acl').child(newData.child('deviceId').val()).child(auth.uid).child('role').val() == 'parent' && newData.child('parentId').val() == auth.uid && newData.child('expiresAt').val() > now",
+        ".validate": "newData.hasChildren(['sessionId', 'deviceId', 'parentId', 'type', 'status', 'expiresAt']) && newData.child('sessionId').val() == $sessionId && newData.child('status').val() == 'PENDING' && newData.child('expiresAt').val() > now",
+        "offer": {
+          ".write": "auth != null && root.child('webrtc').child($sessionId).child('expiresAt').val() > now && root.child('device_acl').child(root.child('webrtc').child($sessionId).child('deviceId').val()).child(auth.uid).child('role').val() == 'parent' && root.child('webrtc').child($sessionId).child('parentId').val() == auth.uid"
+        },
+        "answer": {
+          ".write": "auth != null && root.child('webrtc').child($sessionId).child('expiresAt').val() > now && root.child('device_acl').child(root.child('webrtc').child($sessionId).child('deviceId').val()).child(auth.uid).child('role').val() == 'device' && root.child('webrtc').child($sessionId).child('deviceId').val() == auth.token.deviceId"
+        },
+        "candidates": {
+          "$candidateId": {
+            ".write": "auth != null && root.child('webrtc').child($sessionId).child('expiresAt').val() > now && root.child('device_acl').child(root.child('webrtc').child($sessionId).child('deviceId').val()).child(auth.uid).child('role').val() == 'device' && root.child('webrtc').child($sessionId).child('deviceId').val() == auth.token.deviceId"
+          }
+        },
+        "parent_candidates": {
+          "$candidateId": {
+            ".write": "auth != null && root.child('webrtc').child($sessionId).child('expiresAt').val() > now && root.child('device_acl').child(root.child('webrtc').child($sessionId).child('deviceId').val()).child(auth.uid).child('role').val() == 'parent' && root.child('webrtc').child($sessionId).child('parentId').val() == auth.uid"
+          }
+        }
+      }
+    },
+
+    // ── Stream Frames (fallback when WebRTC unavailable) ────────────────────
+    "stream_frames": {
+      "$deviceId": {
+        ".read": "auth != null && root.child('device_acl').child($deviceId).child(auth.uid).child('role').val() == 'parent'",
+        ".write": "auth != null && root.child('device_acl').child($deviceId).child(auth.uid).child('role').val() == 'device'",
+        // Auto-expire old frames (handled by Cloud Functions TTL)
+        "screen": {
+          ".validate": "newData.hasChildren(['frame', 'sessionId', 'ts']) && newData.child('sessionId').isString() && newData.child('sessionId').val().matches(/^[A-Fa-f0-9-]{36}$/) && root.child('stream_status').child($deviceId).child('screen').child('sessionId').val() == newData.child('sessionId').val() && root.child('stream_status').child($deviceId).child('screen').child('active').val() == true"
+        },
+        "camera": {
+          ".validate": "newData.hasChildren(['frame', 'sessionId', 'ts']) && newData.child('sessionId').isString() && newData.child('sessionId').val().matches(/^[A-Fa-f0-9-]{36}$/) && root.child('webrtc').child(newData.child('sessionId').val()).child('deviceId').val() == $deviceId && root.child('webrtc').child(newData.child('sessionId').val()).child('expiresAt').val() > now"
+        },
+        "audio": {
+          ".validate": "newData.hasChildren(['chunk', 'sessionId', 'ts']) && newData.child('sessionId').isString() && newData.child('sessionId').val().matches(/^[A-Fa-f0-9-]{36}$/) && root.child('webrtc').child(newData.child('sessionId').val()).child('deviceId').val() == $deviceId && root.child('webrtc').child(newData.child('sessionId').val()).child('expiresAt').val() > now"
+        }
+      }
+    },
+
+    // ── Stream Status ───────────────────────────────────────────────────────
+    "stream_status": {
+      "$deviceId": {
+        ".read": "auth != null && root.child('device_acl').child($deviceId).child(auth.uid).child('role').val() == 'parent'",
+        ".write": "auth != null && root.child('device_acl').child($deviceId).child(auth.uid).child('role').val() == 'device'",
+        "screen": {
+          ".validate": "newData.hasChildren(['state', 'active', 'sessionId', 'updatedAt']) && newData.child('state').val().matches(/^(CONSENT_REQUIRED|STARTING|ACTIVE|STOPPED|FAILED)$/) && newData.child('sessionId').isString() && newData.child('sessionId').val().matches(/^[A-Fa-f0-9-]{36}$/) && newData.child('active').isBoolean()"
+        }
+      }
+    }
+  }
+}

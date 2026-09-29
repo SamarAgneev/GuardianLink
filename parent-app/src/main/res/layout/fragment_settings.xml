@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+        <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/sw_location_tracking" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Location tracking" />
+        <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/sw_screen_mirror" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Screen mirroring" />
+        <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/sw_camera_monitor" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Camera monitoring" />
+        <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/sw_audio_monitor" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Audio monitoring" />
+        <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/sw_call_monitor" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Call monitoring" />
+        <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/sw_sms_monitor" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="SMS monitoring" />
+        <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/sw_adult_filter" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Adult content filter" />
+        <TextView android:id="@+id/tv_daily_limit_value" android:layout_width="match_parent" android:layout_height="wrap_content" />
+        <com.google.android.material.slider.Slider android:id="@+id/slider_daily_limit" android:layout_width="match_parent" android:layout_height="wrap_content" android:valueFrom="0" android:valueTo="720" android:value="120" />
+        <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/sw_bedtime" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Bedtime" />
+        <androidx.recyclerview.widget.RecyclerView android:id="@+id/rv_blocked_sites" android:layout_width="match_parent" android:layout_height="120dp" />
+        <Button android:id="@+id/btn_add_blocked_site" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Add blocked site" />
+        <Button android:id="@+id/btn_request_app_usage" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Request app usage" />
+        <Button android:id="@+id/btn_request_call_logs" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Request call logs" />
+        <Button android:id="@+id/btn_request_sms_logs" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Request SMS logs" />
+        <Button android:id="@+id/btn_delete_child_data" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Delete all child data" />
+    </LinearLayout>
+</ScrollView>

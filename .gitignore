@@ -1,0 +1,69 @@
+# GuardianLink .gitignore
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── SECRETS — NEVER COMMIT ───────────────────────────────────────────────────
+secrets.properties
+local.properties
+*.keystore
+*.jks
+google-services.json
+GoogleService-Info.plist
+
+# ── Android Build Outputs ─────────────────────────────────────────────────────
+*.apk
+*.aab
+*.ap_
+*.dex
+bin/
+gen/
+out/
+
+# ── Gradle ────────────────────────────────────────────────────────────────────
+.gradle/
+build/
+**/build/
+!src/**/build/
+.gradletasknamecache
+
+# ── Android Studio / IDE ──────────────────────────────────────────────────────
+*.iml
+.idea/
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/gradle.xml
+.idea/assetWizardSettings.xml
+.idea/dictionaries
+.idea/libraries
+.idea/caches
+.DS_Store
+*.swp
+*~
+
+# ── Firebase ──────────────────────────────────────────────────────────────────
+**/node_modules/
+firebase/.firebase/
+firebase-debug.log
+firestore-debug.log
+database-debug.log
+
+cloudflare/worker/.wrangler/
+
+/dist/
+/.__final_packaging__/
+/GuardianLink_Final_Project.zip
+
+# ── Test / Coverage ───────────────────────────────────────────────────────────
+.coverage
+coverage.xml
+reports/
+test-results/
+/verification/nv21-stride-check/nv21test.jar
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── OS Generated ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini

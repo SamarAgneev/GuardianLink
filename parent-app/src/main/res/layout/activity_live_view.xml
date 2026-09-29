@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical">
+    <ImageView android:id="@+id/iv_live_frame" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:adjustViewBounds="true" android:contentDescription="Live stream" />
+    <TextView android:id="@+id/tv_stream_status" android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="8dp" />
+    <ProgressBar android:id="@+id/progress_loading" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="horizontal">
+        <ImageButton android:id="@+id/btn_switch_camera" android:layout_width="56dp" android:layout_height="56dp" android:contentDescription="Switch camera" android:src="@drawable/ic_camera" />
+        <ImageButton android:id="@+id/btn_capture_photo" android:layout_width="56dp" android:layout_height="56dp" android:contentDescription="Capture photo" android:src="@drawable/ic_camera" />
+        <Button android:id="@+id/btn_stop_stream" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Stop" />
+    </LinearLayout>
+</LinearLayout>

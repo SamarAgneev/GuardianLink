@@ -1,0 +1,106 @@
+name: GuardianLink CI
+
+# No CI previously existed in this repo. This workflow runs everything that
+# is genuinely possible without secrets or an Android SDK/emulator
+# (mirroring exactly what was verified in this pass — see
+# GUARDIANLINK_PASS4_FINAL_REPORT.md §17/§21/§22 for what still needs a real
+# machine). It intentionally does NOT fabricate a green Android build job:
+# that job is present but disabled, with the exact secrets it would need
+# documented inline, per the "no fake build success" rule for this project.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  static-checks:
+    name: Static syntax/format checks (no SDK needed)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Node syntax check — Cloud Functions
+        run: node --check firebase/functions/index.js
+      - name: Node syntax check — rules test harness
+        run: node --check firebase/rules.test.js
+      - name: JSON validity — firestore.indexes.json
+        run: python3 -c "import json; json.load(open('firebase/firestore.indexes.json'))"
+      - name: JSON validity — firebase.json
+        run: python3 -c "import json; json.load(open('firebase/firebase.json'))"
+        # Note: database.rules.json is deliberately NOT strict-JSON-checked
+        # here — Firebase's RTDB rules format permits // and /* */ comments,
+        # which this file uses, and which a standard JSON parser rejects.
+      - name: XML well-formedness — Android manifests and resources
+        run: |
+          set -e
+          find child-app parent-app common -name "*.xml" -not -path "*/build/*" -print0 \
+            | xargs -0 -n1 python3 -c "import sys, xml.dom.minidom; xml.dom.minidom.parse(sys.argv[1])"
+
+  functions-unit-tests:
+    name: Cloud Function unit tests (validateCommandWrite)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: firebase/functions
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+      - run: npm install
+      - run: npm test
+        # These tests mock firebase-admin entirely (see
+        # validateCommandWrite.test.js header) — no emulator, credentials,
+        # or network access to Google's services is required or used.
+
+  rules-tests:
+    name: Firestore/RTDB security rules tests (emulator)
+    runs-on: ubuntu-latest
+    # Disabled by default: the emulator binaries are downloaded from
+    # storage.googleapis.com at first run, which this repo's own CI sandbox
+    # may or may not allow depending on the runner's network policy — on a
+    # standard GitHub-hosted runner this access IS available (unlike the
+    # sandbox this pass was authored in, which blocks it — see the final
+    # report for the exact reproduction of that block). Flip `if: false` to
+    # `if: true` once this has been confirmed to work on your runner.
+    if: false
+    defaults:
+      run:
+        working-directory: firebase
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+      - run: npm install
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - run: npx firebase-tools@13 emulators:exec --only firestore,database "npm run test:rules"
+
+  android-build:
+    name: Android build/test/lint (requires secrets — disabled by default)
+    runs-on: ubuntu-latest
+    # Disabled by default: never fabricate a green build here. Enabling this
+    # job for real requires, at minimum:
+    #   - a real google-services.json for both child-app and parent-app
+    #     (this repo's copies, if present, are placeholders/test fixtures —
+    #     confirm before relying on them for a release build)
+    #   - Android SDK + the exact compileSdk/targetSdk/build-tools versions
+    #     referenced in the Gradle config
+    #   - a signing keystore + its credentials, as repository secrets, for
+    #     release-variant builds specifically (debug builds don't need one)
+    # None of these secrets are defined in this workflow, and none should be
+    # invented or hardcoded — see GUARDIANLINK_PASS4_FINAL_REPORT.md §17 for
+    # the exact commands to run once a real Android environment is
+    # available.
+    if: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+      - run: ./gradlew clean build test lint

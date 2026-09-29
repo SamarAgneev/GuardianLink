@@ -1,0 +1,218 @@
+// firebase/firestore.rules
+//
+// GuardianLink - Firestore Security Rules
+//
+// Device documents are provisioned by the trusted pairing backend. A device
+// document must contain parentId and authUid. The backend also gives the
+// device auth user a custom claim with role=device and deviceId=<deviceId>.
+// This prevents a client from choosing another family's parentId or deviceId.
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ────────────────────────────────────────────────────
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return request.auth.uid == uid;
+    }
+
+    function isParentOfDevice(deviceId) {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/devices/$(deviceId)) &&
+        get(/databases/$(database)/documents/devices/$(deviceId)).data.parentId == request.auth.uid;
+    }
+
+    function isChildDevice(deviceId) {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/devices/$(deviceId)) &&
+        get(/databases/$(database)/documents/devices/$(deviceId)).data.authUid == request.auth.uid &&
+        request.auth.token.role == 'device' &&
+        request.auth.token.deviceId == deviceId;
+    }
+
+    function isAuthorizedDevice(deviceId) {
+      return isParentOfDevice(deviceId) || isChildDevice(deviceId);
+    }
+
+    function validPairingCode(data) {
+      return data.keys().hasAll(['code', 'parentId', 'isUsed', 'createdAt', 'expiresAt']) &&
+        data.parentId == request.auth.uid &&
+        data.isUsed == false &&
+        data.expiresAt > request.time;
+    }
+
+    function ownsDeviceField(data, deviceId) {
+      return data.deviceId == deviceId;
+    }
+
+    // ── Users ───────────────────────────────────────────────────────────────
+
+    match /users/{userId} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+    }
+
+    // ── Devices ─────────────────────────────────────────────────────────────
+
+    match /devices/{deviceId} {
+      allow read: if isAuthorizedDevice(deviceId);
+      // Provisioning is a trusted backend operation. Direct client creation
+      // would let a client claim an arbitrary parentId.
+      allow create: if false;
+      allow update: if isParentOfDevice(deviceId) &&
+        request.resource.data.parentId == resource.data.parentId &&
+        request.resource.data.authUid == resource.data.authUid &&
+        request.resource.data.deviceId == resource.data.deviceId;
+      // Device deletion must use the trusted cascade function so sensitive
+      // subcollections, global logs, Storage objects, RTDB data, and ACLs are
+      // removed together.
+      allow delete: if false;
+
+      match /location_history/{locId} {
+        allow read: if isAuthorizedDevice(deviceId);
+        allow create: if isChildDevice(deviceId) && ownsDeviceField(request.resource.data, deviceId);
+        allow update: if isChildDevice(deviceId) &&
+          ownsDeviceField(resource.data, deviceId) &&
+          ownsDeviceField(request.resource.data, deviceId);
+        allow delete: if isParentOfDevice(deviceId);
+      }
+
+      match /photos/{photoId} {
+        allow read: if isAuthorizedDevice(deviceId);
+        allow create: if isChildDevice(deviceId);
+        allow update: if isParentOfDevice(deviceId);
+        allow delete: if isParentOfDevice(deviceId);
+      }
+
+      match /usage_summaries/{date} {
+        allow read: if isAuthorizedDevice(deviceId);
+        allow create: if isChildDevice(deviceId) && ownsDeviceField(request.resource.data, deviceId);
+        allow update: if isChildDevice(deviceId) &&
+          ownsDeviceField(resource.data, deviceId) &&
+          ownsDeviceField(request.resource.data, deviceId);
+        allow delete: if isParentOfDevice(deviceId);
+      }
+    }
+
+    // ── Pairing Codes ────────────────────────────────────────────────────────
+
+    match /pairing_codes/{codeId} {
+      allow create: if isAuthenticated() && validPairingCode(request.resource.data);
+      allow read: if isAuthenticated() && resource.data.parentId == request.auth.uid;
+      // Redemption is a transaction in the trusted pairing backend. Denying
+      // client updates prevents races and prevents a client from reusing a code.
+      allow update, delete: if false;
+    }
+
+    // ── Settings ─────────────────────────────────────────────────────────────
+
+    match /settings/{deviceId} {
+      allow read: if isAuthorizedDevice(deviceId);
+      allow create: if false;
+      allow update: if isParentOfDevice(deviceId) &&
+        request.resource.data.deviceId == resource.data.deviceId;
+      allow delete: if isParentOfDevice(deviceId);
+    }
+
+    // ── Commands ─────────────────────────────────────────────────────────────
+    // Note: Commands use Realtime DB primarily. This collection is for audit.
+
+    match /commands/{commandId} {
+      allow read: if isAuthorizedDevice(resource.data.deviceId);
+      allow create: if isParentOfDevice(request.resource.data.deviceId) &&
+        request.resource.data.parentId == request.auth.uid;
+      allow update: if isChildDevice(resource.data.deviceId) &&
+        request.resource.data.deviceId == resource.data.deviceId &&
+        request.resource.data.parentId == resource.data.parentId &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['status', 'executedAt', 'response']);
+      allow delete: if isParentOfDevice(resource.data.deviceId);
+    }
+
+    // ── Alerts ───────────────────────────────────────────────────────────────
+
+    match /alerts/{alertId} {
+      allow read: if isAuthorizedDevice(resource.data.deviceId);
+      allow create: if isChildDevice(request.resource.data.deviceId);
+      allow update: if isParentOfDevice(resource.data.deviceId) &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['isRead', 'isResolved']);
+      allow delete: if isParentOfDevice(resource.data.deviceId);
+    }
+
+    // ── Call Logs ─────────────────────────────────────────────────────────────
+
+    match /call_logs/{logId} {
+      allow read: if isAuthorizedDevice(resource.data.deviceId);
+      allow create: if isChildDevice(request.resource.data.deviceId);
+      allow update: if false;
+      allow delete: if isParentOfDevice(resource.data.deviceId);
+    }
+
+    // ── SMS Logs ──────────────────────────────────────────────────────────────
+
+    match /sms_logs/{logId} {
+      allow read: if isAuthorizedDevice(resource.data.deviceId);
+      allow create: if isChildDevice(request.resource.data.deviceId);
+      allow update: if false;
+      allow delete: if isParentOfDevice(resource.data.deviceId);
+    }
+
+    // ── App Usage ─────────────────────────────────────────────────────────────
+
+    match /app_usage/{usageId} {
+      allow read: if isAuthorizedDevice(resource.data.deviceId);
+      allow create: if isChildDevice(request.resource.data.deviceId);
+      allow update: if false;
+      allow delete: if isParentOfDevice(resource.data.deviceId);
+    }
+
+    // ── Reports ───────────────────────────────────────────────────────────────
+
+    match /reports/{reportId} {
+      allow read: if isAuthorizedDevice(resource.data.deviceId);
+      allow create, update: if false;
+      allow delete: if isParentOfDevice(resource.data.deviceId);
+    }
+
+    // ── Stream Sessions ───────────────────────────────────────────────────────
+
+    match /stream_sessions/{sessionId} {
+      allow read: if isAuthorizedDevice(resource.data.deviceId);
+      allow create: if isParentOfDevice(request.resource.data.deviceId) &&
+        request.resource.data.parentId == request.auth.uid &&
+        request.resource.data.sessionId == sessionId &&
+        request.resource.data.sessionId.matches('^[A-Fa-f0-9-]{36}$') &&
+        request.resource.data.status == 'PENDING' &&
+        request.resource.data.isActive == false &&
+        request.resource.data.expiresAt > request.time;
+      allow update: if (
+          isParentOfDevice(resource.data.deviceId) &&
+          request.resource.data.deviceId == resource.data.deviceId &&
+          request.resource.data.parentId == resource.data.parentId &&
+          request.resource.data.sessionId == resource.data.sessionId &&
+          request.resource.data.expiresAt == resource.data.expiresAt
+        ) || (
+          isChildDevice(resource.data.deviceId) &&
+          request.time < resource.data.expiresAt &&
+          request.resource.data.sessionId == resource.data.sessionId &&
+          request.resource.data.deviceId == resource.data.deviceId &&
+          request.resource.data.parentId == resource.data.parentId &&
+          request.resource.data.expiresAt == resource.data.expiresAt &&
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['status', 'isActive', 'startedAt', 'endedAt', 'failureReason', 'lastUpdatedAt'])
+        );
+      allow delete: if isParentOfDevice(resource.data.deviceId);
+    }
+
+    // ── Deny everything else ──────────────────────────────────────────────────
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

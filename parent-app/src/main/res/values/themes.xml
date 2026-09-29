@@ -1,0 +1,9 @@
+<resources>
+    <style name="Theme.GuardianLinkParent" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/guardian_primary</item>
+        <item name="colorPrimaryDark">@color/guardian_primary_dark</item>
+        <item name="colorAccent">@color/guardian_accent</item>
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowActionModeOverlay">true</item>
+    </style>
+</resources>
