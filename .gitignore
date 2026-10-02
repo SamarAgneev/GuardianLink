@@ -8,6 +8,7 @@ local.properties
 *.jks
 google-services.json
 GoogleService-Info.plist
+**/.dev.vars*
 
 # ── Android Build Outputs ─────────────────────────────────────────────────────
 *.apk
@@ -46,7 +47,7 @@ firebase-debug.log
 firestore-debug.log
 database-debug.log
 
-cloudflare/worker/.wrangler/
+**/.wrangler/
 
 /dist/
 /.__final_packaging__/
