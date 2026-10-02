@@ -49,7 +49,8 @@ database-debug.log
 
 **/.wrangler/
 
-/dist/
+/dist/*
+!/dist/*.apk
 /.__final_packaging__/
 /GuardianLink_Final_Project.zip
 
